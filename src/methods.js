@@ -16,11 +16,11 @@ const methods = {
     await document.create.call(this, this._currentCollectionName, data);
   },
 
-  get: function (size = Infinity) {
+  get: function (size = 64) {
     return chain.call(this, document.get, { size });
   },
 
-  remove: function (size = Infinity) {
+  remove: function (size = 64) {
     return chain.call(this, document.remove, { size });
   }
 };

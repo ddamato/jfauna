@@ -70,11 +70,19 @@ describe('jfauna', function () {
     });
 
     describe('get', function () {
-      it('should get a record immediately', async function () {
+      it('should get a record', async function () {
         
         const [record] = await $('posts').get(1).now();
         
         expect(record.data.title).to.equal('My first post');
+      });
+
+      it('should get all (default: 64) records', async function () {
+
+        const records = await $('posts').get().now();
+
+        const { data } = await test.getAllDocuments('posts');
+        expect(records.length).to.equal(data.length);
       });
 
       it('should get a record by key:value', async function () {
@@ -86,7 +94,7 @@ describe('jfauna', function () {
     });
 
     describe('delete', function () {
-      it('should delete a record immediately', async function () {
+      it('should delete a record', async function () {
         
         await $('posts').remove(1).now();
         
