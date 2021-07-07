@@ -29,6 +29,12 @@ describe('jfauna', function () {
       expect(await test.collectionExists('posts')).to.be.true;
     });
 
+    it('should not create a duplicate collection', async function () {
+      await $('posts');
+      const { data } = await test.getAllCollections();
+      expect(data.length).to.equal(1);
+    });
+
     it('should have methods returned', async function () {
       const result = await $('posts');
       expect(result.resolve).to.be.a('function');

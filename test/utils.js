@@ -28,6 +28,14 @@ async function collectionExists(name) {
   return Boolean(await client.query(q.Exists(q.Collection(name))));
 }
 
+async function getAllCollections() {
+  const client = createLocalClient();
+  return await client.query(q.Map(
+    q.Paginate(q.Collections()),
+    q.Lambda(x => q.Get(x))
+  ));
+}
+
 async function deleteCollection(name) {
   const client = createLocalClient();
   await client.query(q.Delete(q.Collection(name)));
@@ -47,5 +55,6 @@ module.exports = {
   destroy,
   collectionExists,
   getAllDocuments,
-  deleteCollection
+  deleteCollection,
+  getAllCollections
 };
