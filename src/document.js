@@ -10,10 +10,19 @@ async function create(collection, data) {
 
 async function get(params) {
   const { index, value, ...pagination } = params;
-  const query = q.Map(
-    q.Paginate(q.Match(q.Index(index), [].concat(value)), pagination),
-    q.Lambda(x => q.Get(x))
-  );
+  let query;
+
+  if (!value) {
+    query = q.Map(
+      q.Paginate(q.Match(q.Index(index)), pagination),
+      q.Lambda(x => q.Get(x))
+    )
+  } else {
+    query = q.Map(
+      q.Paginate(q.Match(q.Index(index), [].concat(value)), pagination),
+      q.Lambda(x => q.Get(x))
+    );
+  }
   const response = await this._client.query(query);
   const results = [].concat(response.data).filter(Boolean);
 

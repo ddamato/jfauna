@@ -1,4 +1,3 @@
-const { q } = require('./faunadb');
 const collection = require('./collection');
 const index = require('./index');
 const document = require('./document');
@@ -20,10 +19,7 @@ function jfauna(client) {
   this._client = client;
   this._promises = [];
   const instance = (collectionName) => {
-    const collectionPromise = collection.exists.call(this, collectionName).then((exists) => {
-      return !exists && collection.create.call(this, collectionName);
-    });
-    this._promises.push(collectionPromise);
+    this._promises.push(collection.ensure.call(this, collectionName));
     const methods = {
       resolve: async () => {
         await Promise.all(this._promises);
@@ -36,14 +32,17 @@ function jfauna(client) {
       },
       get: (size = Infinity) => {
         return {
+          now: async () => {
+            const name = index.name('now', collectionName);
+            await index.ensure.call(this, collectionName, name);
+            return await document.get.call(this, { index: name, size });
+          },
           where: (field) => {
             const name = index.name('where', collectionName, field);
             return {
               equals: async (value) => {
                 methods.resolve();
-                await index.exists.call(this, name).then((exists) => {
-                  return !exists && index.create.call(this, collectionName, name, field);
-                });
+                await index.ensure.call(this, collectionName, name, field);
                 return await document.get.call(this, { index: name, value, size });
               }
             }

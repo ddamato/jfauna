@@ -51,9 +51,14 @@ describe('jfauna', function () {
       expect(data.length).to.equal(3);
     });
 
-    it('should get a record by key:value', async function () {
-      const [record] = await $('posts').get(1).where('title').equals('My first post');
+    it('should get a record immediately', async function () {
+      const [record] = await $('posts').get(1).now();
       expect(record.data.title).to.equal('My first post');
+    });
+
+    it('should get a record by key:value', async function () {
+      const [record] = await $('posts').get(1).where('title').equals('My second post');
+      expect(record.data.title).to.equal('My second post');
     });
   });
 });
