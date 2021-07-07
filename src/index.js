@@ -14,12 +14,12 @@ async function create(collectionName, name, field) {
   )
 }
 
-function generateName(collectionName, field) {
-  return `${collectionName}-${field}`;
+function name(...parts) {
+  return parts.join('-');
 }
 
 module.exports = { 
   exists,
   create,
-  generateName,
+  name,
 };

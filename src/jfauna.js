@@ -7,13 +7,13 @@ const document = require('./document');
 // Hold reference to the current database, should be changeable
 // Hold reference to the current collection, should be changeable
 
-// const $ = jfauna(secret, database); return one instance, $ should be a function
-// $.create('database_name') returns the key to creating a database
+// const $ = jfauna(client); return one instance, $ should be a function
 // collection doesn't exist -> create! (no failures!)
 
-// $(collection).get().where().eq();
-// $(collection).delete().where().lt();
-// $(collection).update().where().gt().or.lt() (same as upsert)
+// $(collection).get().where().equals();
+// $(collection).get().between().and();
+// $(collection).delete();
+// $(collection).update();
 // $(collection).insert();
 
 function jfauna(client) {
@@ -32,22 +32,19 @@ function jfauna(client) {
       },
       insert: async (data) => {
         methods.resolve();
-        // TODO: do this as array (q.Map)
         await document.create.call(this, collectionName, data);
       },
-      get: (amount) => {
-        // TODO: do this as array (q.Map)
-        console.log('AMOUNT:', amount);
+      get: (size = Infinity) => {
         return {
           where: (field) => {
-            const name = index.generateName(collectionName, field);
+            const name = index.name('where', collectionName, field);
             return {
               equals: async (value) => {
                 methods.resolve();
                 await index.exists.call(this, name).then((exists) => {
                   return !exists && index.create.call(this, collectionName, name, field);
                 });
-                return await document.get.call(this, name, value);
+                return await document.get.call(this, { index: name, value, size });
               }
             }
           }

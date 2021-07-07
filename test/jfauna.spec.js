@@ -1,33 +1,12 @@
 const jfauna = require('../src/jfauna');
 const { expect } = require('chai');
-const { create, destroy, collectionExists, getAllDocuments, deleteCollection } = require('./utils');
+const { collectionExists, getAllDocuments, deleteCollection } = require('./utils');
 
 describe('jfauna', function () {
-  let client, dbTestName;
-
-  before(async function () {
-    dbTestName = `jfauna-test-${Date.now().toString()}`;
-    try {
-      client = await create(dbTestName);
-    } catch (err) {
-      if (err.name === 'ClientClosed') {
-        console.error('Did you run "npm run db:start"?');
-      }
-      console.error(err);
-    }
-  });
-
-  after(async function () {
-    await destroy(dbTestName);
-  });
-
-  it('should create new client', function () {
-    expect(client.stream).to.be.a('function');
-  });
 
   describe('instantiation', function () {
     it('should create a new instance', function () {
-      const $ = new jfauna(client);
+      const $ = new jfauna(global.FAUNA_DB_CLIENT);
       expect($).to.be.instanceOf(jfauna);
       expect($).to.be.a('function');
     });
@@ -37,7 +16,7 @@ describe('jfauna', function () {
     let $;
 
     before(function () {
-      $ = new jfauna(client);
+      $ = new jfauna(global.FAUNA_DB_CLIENT);
     });
 
     after(async function () {
@@ -63,9 +42,18 @@ describe('jfauna', function () {
       expect(data.length).to.equal(1);
     });
 
+    it('should create multiple records', async function () {
+      await $('posts').insert([
+        { title: 'My second post' },
+        { title: 'My third post' }
+      ]);
+      const { data } = await getAllDocuments('posts');
+      expect(data.length).to.equal(3);
+    });
+
     it('should get a record by key:value', async function () {
-      const { data } = await $('posts').get(1).where('title').equals('My first post');
-      expect(data.title).to.equal('My first post');
+      const [record] = await $('posts').get(1).where('title').equals('My first post');
+      expect(record.data.title).to.equal('My first post');
     });
   });
 });
