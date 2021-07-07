@@ -5,6 +5,12 @@ async function exists(name) {
 }
 
 function ensure(collectionName, name, field) {
+  if (this.cache) {
+    if (this._indexCache.has(name)) {
+      return Promise.resolve();
+    }
+    this._indexCache.add(name);
+  }
   return exists.call(this, name).then((exists) => {
     return !exists && create.call(this, collectionName, name, field);
   });

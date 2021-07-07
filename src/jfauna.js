@@ -15,9 +15,12 @@ const document = require('./document');
 // $(collection).update();
 // $(collection).insert();
 
-function jfauna(client) {
+function jFauna(client) {
   this._client = client;
   this._promises = [];
+  this._collectionCache = new Set();
+  this._indexCache = new Set();
+  this.cache = true;
   const instance = (collectionName) => {
     const methods = {
       resolve: async () => {
@@ -75,7 +78,7 @@ function jfauna(client) {
     this._promises.push(ensureCollectionPromise);
     return Object.assign(ensureCollectionPromise, methods);
   };
-  return Object.setPrototypeOf(instance, jfauna.prototype);
+  return Object.setPrototypeOf(instance, jFauna.prototype);
 }
 
-module.exports = jfauna;
+module.exports = jFauna;

@@ -9,6 +9,12 @@ async function create(name) {
 }
 
 function ensure(collectionName) {
+  if (this.cache) {
+    if (this._collectionCache.has(collectionName)) {
+      return Promise.resolve();
+    }
+    this._collectionCache.add(collectionName);
+  }
   return exists.call(this, collectionName).then((exists) => {
     return !exists && create.call(this, collectionName);
   });

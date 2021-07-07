@@ -1,4 +1,4 @@
-const jfauna = require('../src/jfauna');
+const jFauna = require('../src/jfauna');
 const { expect } = require('chai');
 const test = require('./utils');
 
@@ -6,8 +6,8 @@ describe('jfauna', function () {
 
   describe('instantiation', function () {
     it('should create a new instance', function () {
-      const $ = new jfauna(global.FAUNA_DB_CLIENT);
-      expect($).to.be.instanceOf(jfauna);
+      const $ = new jFauna(global.FAUNA_DB_CLIENT);
+      expect($).to.be.instanceOf(jFauna);
       expect($).to.be.a('function');
     });
   });
@@ -16,7 +16,7 @@ describe('jfauna', function () {
     let $;
 
     before(function () {
-      $ = new jfauna(global.FAUNA_DB_CLIENT);
+      $ = new jFauna(global.FAUNA_DB_CLIENT);
     });
 
     after(async function () {
