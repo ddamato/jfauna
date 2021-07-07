@@ -1,20 +1,25 @@
-const { document, index } = require('../queries/queries');
+const { collection, document, index } = require('../queries/queries');
 
 const methods = {
+  init: async function (m) {
+    await collection.ensure.call(this, this._currentCollectionName);
+    return m;
+  },
+
   resolve: async function () {
     await Promise.all(this._promises);
     this._promises.length = 0;
   },
 
   insert: async function (data) {
-    methods.resolve.call(this);
-    document.create.call(this, this._currentCollectionName, data);
+    await methods.resolve.call(this);
+    await document.create.call(this, this._currentCollectionName, data);
   },
 
   get: function (size = Infinity) {
     return {
       now: async () => {
-        methods.resolve.call(this);
+        await methods.resolve.call(this);
         const name = index.name('now', this._currentCollectionName);
         await index.ensure.call(this, this._currentCollectionName, name);
         return await document.get.call(this, { index: name, size });
@@ -23,7 +28,7 @@ const methods = {
         const name = index.name('where', this._currentCollectionName, field);
         return {
           equals: async (value) => {
-            methods.resolve.call(this);
+            await methods.resolve.call(this);
             await index.ensure.call(this, this._currentCollectionName, name, field);
             return await document.get.call(this, { index: name, value, size });
           }
@@ -35,7 +40,7 @@ const methods = {
   remove: function (size = Infinity) {
     return {
       now: async () => {
-        methods.resolve.call(this);
+        await methods.resolve.call(this);
         const name = index.name('now', this._currentCollectionName);
         await index.ensure.call(this, this._currentCollectionName, name);
         return await document.remove.call(this, { index: name, size });
@@ -44,7 +49,7 @@ const methods = {
         const name = index.name('where', this._currentCollectionName, field);
         return {
           equals: async (value) => {
-            methods.resolve.call(this);
+            await methods.resolve.call(this);
             await index.ensure.call(this, this._currentCollectionName, name, field);
             return await document.remove.call(this, { index: name, value, size });
           }
