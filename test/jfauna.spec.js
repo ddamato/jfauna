@@ -25,14 +25,14 @@ describe('jfauna', function () {
     });
 
     it('should have methods returned', async function () {
-      const result = await $('posts').resolve();
+      const result = await $('posts');
       expect(result.resolve).to.be.a('function');
       expect(result.insert).to.be.a('function');
       expect(result.get).to.be.a('function');
     });
 
     it('should create a new collection', async function () {
-      await $('posts').resolve();
+      await $('posts');
       expect(await collectionExists('posts')).to.be.true;
     });
 

@@ -19,7 +19,6 @@ function jfauna(client) {
   this._client = client;
   this._promises = [];
   const instance = (collectionName) => {
-    this._promises.push(collection.ensure.call(this, collectionName));
     const methods = {
       resolve: async () => {
         await Promise.all(this._promises);
@@ -51,7 +50,9 @@ function jfauna(client) {
       }
     };
 
-    return methods;
+    const ensureCollectionPromise = collection.ensure.call(this, collectionName).then(() => methods);
+    this._promises.push(ensureCollectionPromise);
+    return Object.assign(ensureCollectionPromise, methods);
   };
   return Object.setPrototypeOf(instance, jfauna.prototype);
 }
