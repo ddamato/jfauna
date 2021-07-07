@@ -20,6 +20,7 @@ function jFauna(client) {
   this._indexCache = new Set();
   this.cache = true;
   const instance = (collectionName) => {
+    this._currentCollectionName = collectionName;
     const methods = {
       resolve: async () => {
         await Promise.all(this._promises);
@@ -28,22 +29,22 @@ function jFauna(client) {
       },
       insert: async (data) => {
         methods.resolve();
-        await document.create.call(this, collectionName, data);
+        await document.create.call(this, this._currentCollectionName, data);
       },
       remove: (size = Infinity) => {
         return {
           now: async () => {
             methods.resolve();
-            const name = index.name('now', collectionName);
-            await index.ensure.call(this, collectionName, name);
+            const name = index.name('now', this._currentCollectionName);
+            await index.ensure.call(this, this._currentCollectionName, name);
             return await document.remove.call(this, { index: name, size });
           },
           where: (field) => {
-            const name = index.name('where', collectionName, field);
+            const name = index.name('where', this._currentCollectionName, field);
             return {
               equals: async (value) => {
                 methods.resolve();
-                await index.ensure.call(this, collectionName, name, field);
+                await index.ensure.call(this, this._currentCollectionName, name, field);
                 return await document.remove.call(this, { index: name, value, size });
               }
             }
@@ -54,16 +55,16 @@ function jFauna(client) {
         return {
           now: async () => {
             methods.resolve();
-            const name = index.name('now', collectionName);
-            await index.ensure.call(this, collectionName, name);
+            const name = index.name('now', this._currentCollectionName);
+            await index.ensure.call(this, this._currentCollectionName, name);
             return await document.get.call(this, { index: name, size });
           },
           where: (field) => {
-            const name = index.name('where', collectionName, field);
+            const name = index.name('where', this._currentCollectionName, field);
             return {
               equals: async (value) => {
                 methods.resolve();
-                await index.ensure.call(this, collectionName, name, field);
+                await index.ensure.call(this, this._currentCollectionName, name, field);
                 return await document.get.call(this, { index: name, value, size });
               }
             }
@@ -72,7 +73,7 @@ function jFauna(client) {
       }
     };
 
-    const ensureCollectionPromise = collection.ensure.call(this, collectionName).then(() => methods);
+    const ensureCollectionPromise = collection.ensure.call(this, this._currentCollectionName).then(() => methods);
     this._promises.push(ensureCollectionPromise);
     return Object.assign(ensureCollectionPromise, methods);
   };
