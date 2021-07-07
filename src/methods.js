@@ -17,46 +17,37 @@ const methods = {
   },
 
   get: function (size = Infinity) {
-    return {
-      now: async () => {
-        await methods.resolve.call(this);
-        const name = index.name('now', this._currentCollectionName);
-        await index.ensure.call(this, this._currentCollectionName, name);
-        return await document.get.call(this, { index: name, size });
-      },
-      where: (field) => {
-        const name = index.name('where', this._currentCollectionName, field);
-        return {
-          equals: async (value) => {
-            await methods.resolve.call(this);
-            await index.ensure.call(this, this._currentCollectionName, name, field);
-            return await document.get.call(this, { index: name, value, size });
-          }
-        }
-      }
-    }
+    return chain.call(this, document.get, { size });
   },
 
   remove: function (size = Infinity) {
-    return {
-      now: async () => {
-        await methods.resolve.call(this);
-        const name = index.name('now', this._currentCollectionName);
-        await index.ensure.call(this, this._currentCollectionName, name);
-        return await document.remove.call(this, { index: name, size });
-      },
-      where: (field) => {
-        const name = index.name('where', this._currentCollectionName, field);
-        return {
-          equals: async (value) => {
-            await methods.resolve.call(this);
-            await index.ensure.call(this, this._currentCollectionName, name, field);
-            return await document.remove.call(this, { index: name, value, size });
-          }
-        }
+    return chain.call(this, document.remove, { size });
+  }
+};
+
+function chain(operation, { size }) {
+  return {
+    now: async () => now.call(this, operation, { size }),
+    where: (field) => {
+      return {
+        equals: async (value) => equals.call(this, operation, { size, field, value })
       }
     }
   }
-};
+}
+
+async function now(operation, { size }) {
+  await methods.resolve.call(this);
+  const name = index.name('now', this._currentCollectionName);
+  await index.ensure.call(this, this._currentCollectionName, name);
+  return await operation.call(this, { index: name, size });
+}
+
+async function equals(operation, { field, value, size }) {
+  await methods.resolve.call(this);
+  const name = index.name('equals', this._currentCollectionName, field);
+  await index.ensure.call(this, this._currentCollectionName, name, field);
+  return await operation.call(this, { index: name, value, size });
+}
 
 module.exports = methods;
