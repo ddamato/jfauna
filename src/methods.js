@@ -1,5 +1,7 @@
 const { collection, document, index } = require('../queries/queries');
 
+const FAUNA_PAGINATION_SIZE = 64;
+
 const methods = {
   init: async function (m) {
     await collection.ensure.call(this, this._currentCollectionName);
@@ -16,11 +18,11 @@ const methods = {
     await document.create.call(this, this._currentCollectionName, data);
   },
 
-  get: function (size = 64) {
+  get: function (size = FAUNA_PAGINATION_SIZE) {
     return chain.call(this, document.get, { size });
   },
 
-  remove: function (size = 64) {
+  remove: function (size = FAUNA_PAGINATION_SIZE) {
     return chain.call(this, document.remove, { size });
   }
 };
