@@ -73,7 +73,7 @@ describe('jfauna', function () {
 
     describe('delete', function () {
       it('should delete a record immediately', async function () {
-        await $('posts').delete(1).now();
+        await $('posts').remove(1).now();
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(2);
         const titles = data.map(({ data }) => data.title);
@@ -82,7 +82,7 @@ describe('jfauna', function () {
       });
 
       it('should delete a record by key:value', async function () {
-        await $('posts').delete(1).where('title').equals('My second post');
+        await $('posts').remove(1).where('title').equals('My second post');
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(1);
         const titles = data.map(({ data }) => data.title);

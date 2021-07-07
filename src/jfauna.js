@@ -1,6 +1,4 @@
-const collection = require('./collection');
-const index = require('./index');
-const document = require('./document');
+const { collection, document, index } = require('../queries/queries');
 
 // Hold reference to the client (logged in)
 // Hold reference to the current database, should be changeable
@@ -32,13 +30,13 @@ function jFauna(client) {
         methods.resolve();
         await document.create.call(this, collectionName, data);
       },
-      delete: (size = Infinity) => {
+      remove: (size = Infinity) => {
         return {
           now: async () => {
             methods.resolve();
             const name = index.name('now', collectionName);
             await index.ensure.call(this, collectionName, name);
-            return await document.del.call(this, { index: name, size });
+            return await document.remove.call(this, { index: name, size });
           },
           where: (field) => {
             const name = index.name('where', collectionName, field);
@@ -46,7 +44,7 @@ function jFauna(client) {
               equals: async (value) => {
                 methods.resolve();
                 await index.ensure.call(this, collectionName, name, field);
-                return await document.del.call(this, { index: name, value, size });
+                return await document.remove.call(this, { index: name, value, size });
               }
             }
           }

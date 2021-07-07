@@ -8,7 +8,7 @@ async function create(collection, data) {
   await this._client.query(query);
 }
 
-async function del(params) {
+async function remove(params) {
   const { index, value, ...pagination } = params;
   let query;
 
@@ -58,5 +58,5 @@ async function get(params) {
 module.exports = { 
   create,
   get,
-  del,
+  remove,
 };
