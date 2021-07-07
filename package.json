@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "db:start": "docker run --name faunadb -p 8443:8443 -p 8084:8084 fauna/faunadb",
-    "docker:end": "docker rm /faunadb",
+    "db:end": "docker container stop faunadb && docker container rm faunadb",
     "test": "nyc mocha"
   },
   "repository": {
