@@ -3,11 +3,18 @@ const { expect } = require('chai');
 const test = require('./utils');
 
 describe('jfauna', function () {
+  let $;
+
+  after(async function () {
+    // Clear the database
+    await test.deleteCollection('posts');
+  });
 
   describe('instantiation', function () {
     it('should create a new instance', function () {
-      
-      const $ = new jFauna(global.FAUNA_DB_CLIENT);
+
+      // Creates a new instance of jFauna  
+      $ = new jFauna(global.FAUNA_DB_CLIENT);
       
       expect($).to.be.instanceOf(jFauna);
       expect($).to.be.a('function');
@@ -15,24 +22,17 @@ describe('jfauna', function () {
   });
 
   describe('collections', function () {
-    let $;
-
-    before(function () {
-      $ = new jFauna(global.FAUNA_DB_CLIENT);
-    });
-
-    after(async function () {
-      await test.deleteCollection('posts');
-      delete $;
-    });
-
     it('should create a new collection', async function () {
+
+      // Create a new collection called "posts"
       await $('posts');
       
       expect(await test.collectionExists('posts')).to.be.true;
     });
 
     it('should not create a duplicate collection', async function () {
+
+      // References an existing colleciton called "posts"
       await $('posts');
       
       const { data } = await test.getAllCollections();
@@ -41,13 +41,16 @@ describe('jfauna', function () {
 
     it('should have methods returned', async function () {
       
+      // The reference has chainable methods returned
       const result = await $('posts');
       
       expect(result.resolve).to.be.a('function');
       expect(result.insert).to.be.a('function');
       expect(result.get).to.be.a('function');
     });
+  });
 
+  describe('documents', function (){
     describe('create', function () {
       it('should create a single new record', async function () {
         
@@ -116,7 +119,6 @@ describe('jfauna', function () {
         expect(titles).to.include('My third post');
       });
     });
-    
   });
 });
 

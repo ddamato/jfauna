@@ -1,4 +1,4 @@
-const { collection, document, index } = require('../queries/queries');
+const { collection, document, index } = require('./queries/queries');
 
 const FAUNA_PAGINATION_SIZE = 64;
 
