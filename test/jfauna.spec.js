@@ -70,16 +70,18 @@ describe('jfauna', function () {
         await $('posts').delete(1).now();
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(2);
-        const titles = data.map(({ data }) => data.titles);
+        const titles = data.map(({ data }) => data.title);
         expect(titles).to.not.include('My first post');
+        expect(titles).to.include('My second post');
       });
 
       it('should delete a record by key:value', async function () {
         await $('posts').delete(1).where('title').equals('My second post');
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.titles);
+        const titles = data.map(({ data }) => data.title);
         expect(titles).to.not.include('My second post');
+        expect(titles).to.include('My third post');
       });
     });
     
