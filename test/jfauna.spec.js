@@ -1,6 +1,6 @@
 const jfauna = require('../src/jfauna');
 const { expect } = require('chai');
-const { collectionExists, getAllDocuments, deleteCollection } = require('./utils');
+const test = require('./utils');
 
 describe('jfauna', function () {
 
@@ -20,8 +20,13 @@ describe('jfauna', function () {
     });
 
     after(async function () {
-      await deleteCollection('posts');
+      await test.deleteCollection('posts');
       delete $;
+    });
+
+    it('should create a new collection', async function () {
+      await $('posts');
+      expect(await test.collectionExists('posts')).to.be.true;
     });
 
     it('should have methods returned', async function () {
@@ -31,35 +36,53 @@ describe('jfauna', function () {
       expect(result.get).to.be.a('function');
     });
 
-    it('should create a new collection', async function () {
-      await $('posts');
-      expect(await collectionExists('posts')).to.be.true;
+    describe('create', function () {
+      it('should create a single new record', async function () {
+        await $('posts').insert({ title: 'My first post' });
+        const { data } = await test.getAllDocuments('posts');
+        expect(data.length).to.equal(1);
+      });
+  
+      it('should create multiple records', async function () {
+        await $('posts').insert([
+          { title: 'My second post' },
+          { title: 'My third post' }
+        ]);
+        const { data } = await test.getAllDocuments('posts');
+        expect(data.length).to.equal(3);
+      });
     });
 
-    it('should create a single new record', async function () {
-      await $('posts').insert({ title: 'My first post' });
-      const { data } = await getAllDocuments('posts');
-      expect(data.length).to.equal(1);
+    describe('get', function () {
+      it('should get a record immediately', async function () {
+        const [record] = await $('posts').get(1).now();
+        expect(record.data.title).to.equal('My first post');
+      });
+
+      it('should get a record by key:value', async function () {
+        const [record] = await $('posts').get(1).where('title').equals('My second post');
+        expect(record.data.title).to.equal('My second post');
+      });
     });
 
-    it('should create multiple records', async function () {
-      await $('posts').insert([
-        { title: 'My second post' },
-        { title: 'My third post' }
-      ]);
-      const { data } = await getAllDocuments('posts');
-      expect(data.length).to.equal(3);
-    });
+    describe('delete', function () {
+      it('should delete a record immediately', async function () {
+        await $('posts').delete(1).now();
+        const { data } = await test.getAllDocuments('posts');
+        expect(data.length).to.equal(2);
+        const titles = data.map(({ data }) => data.titles);
+        expect(titles).to.not.include('My first post');
+      });
 
-    it('should get a record immediately', async function () {
-      const [record] = await $('posts').get(1).now();
-      expect(record.data.title).to.equal('My first post');
+      it('should delete a record by key:value', async function () {
+        await $('posts').delete(1).where('title').equals('My second post');
+        const { data } = await test.getAllDocuments('posts');
+        expect(data.length).to.equal(1);
+        const titles = data.map(({ data }) => data.titles);
+        expect(titles).to.not.include('My second post');
+      });
     });
-
-    it('should get a record by key:value', async function () {
-      const [record] = await $('posts').get(1).where('title').equals('My second post');
-      expect(record.data.title).to.equal('My second post');
-    });
+    
   });
 });
 

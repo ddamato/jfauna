@@ -8,6 +8,24 @@ async function create(collection, data) {
   await this._client.query(query);
 }
 
+async function del(params) {
+  const { index, value, ...pagination } = params;
+  let query;
+
+  if (!value) {
+    query = q.Map(
+      q.Paginate(q.Match(q.Index(index)), pagination),
+      q.Lambda(x => q.Delete(x))
+    )
+  } else {
+    query = q.Map(
+      q.Paginate(q.Match(q.Index(index), [].concat(value)), pagination),
+      q.Lambda(x => q.Delete(x))
+    );
+  }
+  await this._client.query(query);
+}
+
 async function get(params) {
   const { index, value, ...pagination } = params;
   let query;
@@ -40,4 +58,5 @@ async function get(params) {
 module.exports = { 
   create,
   get,
+  del,
 };
