@@ -87,7 +87,7 @@ describe('jfauna', function () {
         
         const [record] = await $('posts').get(1).now();
         
-        expect(record.data.title).to.equal('My first post');
+        expect(record.title).to.equal('My first post');
       });
 
       it('should get all (default: 64) records', async function () {
@@ -102,7 +102,7 @@ describe('jfauna', function () {
         
         const [record] = await $('posts').get(1).where('title').is('My second post');
         
-        expect(record.data.title).to.equal('My second post');
+        expect(record.title).to.equal('My second post');
       });
 
       it('should exclude a record by key:value', async function () {

@@ -24,7 +24,7 @@ async function commonQuery(params, lambda) {
     q.Lambda(lambda)
   )
   const response = await this._client.query(query);
-  return handlePaginatedResponse(response, params, lambda);
+  return handlePaginatedResponse.call(this, response, params, lambda);
 }
 
 function getOperations({ index, value, compare }) {
@@ -45,7 +45,11 @@ function getPagination({ size, before, after }) {
 }
 
 function handlePaginatedResponse(response, params, lambda) {
-  const results = [].concat(response.data).filter(Boolean);
+  const results = []
+    .concat(response.data)
+    .map((result) => !this.raw && result.data ? result.data : result)
+    .filter(Boolean);
+
   if (response.before) {
     results.prev = (amt = params.size) => {
       const updated = { ...params, before: response.before, size: amt };

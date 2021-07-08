@@ -7,6 +7,7 @@ function jFauna(client) {
   this._collectionCache = new Set();
   this._indexCache = new Set();
   this.cache = true;
+  this.raw = false;
 
   const instance = (collectionName) => {
     

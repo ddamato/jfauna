@@ -1,12 +1,8 @@
 const { query: q } = require('faunadb');
 
 async function create(name, field) {
-  let terms;
-  if (field) {
-    terms = [{ field: ['data', field] }];
-  }
   const source = q.Collection(this._currentCollectionName);
-  const query = q.CreateIndex({ name, source, terms });
+  const query = q.CreateIndex({ name, source, terms: terms(field) });
   await this._client.query(query);
 }
 
@@ -28,6 +24,10 @@ async function name(type, field) {
 
 async function exists(name) {
   return Boolean(await this._client.query(q.Exists(q.Index(name))));
+}
+
+function terms(field) {
+  return field ? [{ field: ['data', field] }] : null;
 }
 
 module.exports = { name };
