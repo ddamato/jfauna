@@ -48,8 +48,8 @@ function chain(operation, params) {
         isnt: async (value) => {
           await methods.resolve.call(this);
           const [ref, compare] = await Promise.all([
-            await index.name.call(this, 'equals', field),
-            await index.name.call(this, 'all')
+            index.name.call(this, 'equals', field),
+            index.name.call(this, 'all')
           ]);
           return await operation.call(this, { ...params, index: ref, field, value, compare })
         }
