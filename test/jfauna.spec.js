@@ -103,7 +103,7 @@ describe('jfauna', function () {
         expect(record.data.title).to.equal('My second post');
       });
 
-      it.skip('should exclude a record by key:value', async function () {
+      it('should exclude a record by key:value', async function () {
         
         const records = await $('posts').get().where('title').isnt('My second post');
         

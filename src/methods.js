@@ -33,7 +33,7 @@ function chain(operation, { size }) {
     where: (field) => {
       return {
         is: async (value) => equals.call(this, operation, { size, field, value }),
-        isnt: async (value) => equals.call(this, operation, { size, field, value, not: true })
+        isnt: async (value) => equals.call(this, operation, { size, field, value, compare: index.name('all', this._currentCollectionName) })
       }
     }
   }
@@ -41,16 +41,21 @@ function chain(operation, { size }) {
 
 async function now(operation, { size }) {
   await methods.resolve.call(this);
-  const name = index.name('now', this._currentCollectionName);
+  const name = index.name('all', this._currentCollectionName);
   await index.ensure.call(this, this._currentCollectionName, name);
   return await operation.call(this, { index: name, size });
 }
 
-async function equals(operation, { field, value, size, not }) {
+async function equals(operation, { field, value, size, compare }) {
   await methods.resolve.call(this);
   const name = index.name('equals', this._currentCollectionName, field);
   await index.ensure.call(this, this._currentCollectionName, name, field);
-  return await operation.call(this, { index: name, value, size, not });
+
+  if (compare) {
+    await index.ensure.call(this, this._currentCollectionName, compare);
+  }
+
+  return await operation.call(this, { index: name, value, size, compare });
 }
 
 module.exports = methods;

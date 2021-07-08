@@ -8,51 +8,59 @@ async function create(collection, data) {
   await this._client.query(query);
 }
 
-async function remove(params) {
-  const { index, value, not, ...pagination } = params;
-  
-  const operation = getOperations(params);
-  
-  const query = q.Map(
-    q.Paginate(operation, pagination),
-    q.Lambda(x => q.Delete(x))
-  )
-  await this._client.query(query);
+function remove(params) {
+  return commonQuery.call(this, params, x => q.Delete(x))
 }
 
-function getOperations({ index, value, not }) {
+function getOperations({ index, value, compare }) {
   const Match = value
     ? q.Match(q.Index(index), [].concat(value))
     : q.Match(q.Index(index));
 
   const Difference = q.Difference(
-    q.Match(q.Index(index)),
+    q.Match(q.Index(compare)),
     q.Match(q.Index(index), [].concat(value))
   );
 
-  return not ? Difference : Match;
+  return compare ? Difference : Match;
 }
 
-async function get(params) {
-  const { index, value, not, ...pagination } = params;
+function getPagination(params) {
+  return {
+    size: params.size,
+    before: params.before,
+    after: params.after
+  }
+}
 
-  const operation = getOperations(params);
-
+async function commonQuery(params, lambda) {
   const query = q.Map(
-    q.Paginate(operation, pagination),
-    q.Lambda(x => q.Get(x))
+    q.Paginate(getOperations(params), getPagination(params)),
+    q.Lambda(lambda)
   )
   const response = await this._client.query(query);
-  const results = [].concat(response.data).filter(Boolean);
+  return handlePaginatedResponse(response, params, lambda);
+}
 
+function get(params) {
+  return commonQuery.call(this, params, x => q.Get(x))
+}
+
+function handlePaginatedResponse(response, params, lambda) {
+  const results = [].concat(response.data).filter(Boolean);
   if (response.before) {
-    results.prev = (amt = pagination.size) => get({ ...params, before: response.before, size: amt });
+    results.prev = (amt = params.size) => {
+      const updated = { ...params, before: response.before, size: amt };
+      return commonQuery.call(this, updated, lambda);
+    };
   }
 
   if (response.after) {
-    results.next = (amt = amount) => get({ ...params, after: response.after, amount: amt });
+    results.next = (amt = params.size) => {
+      const updated = { ...params, after: response.after, size: amt };
+      return commonQuery.call(this, updated, lambda);
+    };
   }
-
   return results;
 }
 
