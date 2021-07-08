@@ -1,4 +1,4 @@
-const { q } = require('./faunadb');
+const { query: q } = require('faunadb');
 
 async function create(data) {
   const query = q.Map(

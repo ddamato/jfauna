@@ -50,7 +50,6 @@ async function getAllDocuments(name) {
 }
 
 module.exports = {
-  config,
   create,
   destroy,
   collectionExists,

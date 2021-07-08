@@ -1,4 +1,4 @@
-const { q } = require('./faunadb');
+const { query: q } = require('faunadb');
 
 async function exists() {
   return Boolean(await this._client.query(q.Exists(q.Collection(this._currentCollectionName))));

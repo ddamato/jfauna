@@ -1,18 +1,5 @@
 const m = require('./methods');
 
-// Hold reference to the client (logged in)
-// Hold reference to the current database, should be changeable
-// Hold reference to the current collection, should be changeable
-
-// const $ = jfauna(client); return one instance, $ should be a function
-// collection doesn't exist -> create! (no failures!)
-
-// $(collection).get(amount).where(field).is(value);
-// $(collection).get().where().isnt();
-// $(collection).delete();
-// $(collection).update();
-// $(collection).insert();
-
 function jFauna(client) {
 
   this._client = client;
