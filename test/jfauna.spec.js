@@ -8,6 +8,7 @@ describe('jfauna', function () {
   after(async function () {
     // Clear the database
     await test.deleteCollection('posts');
+    await test.deleteCollection('pages');
   });
 
   describe('instantiation', function () {
@@ -59,6 +60,13 @@ describe('jfauna', function () {
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(1);
       });
+
+      it('should create a collection and document at once', async function () {
+        await $('pages').insert({ title: 'My first page' });
+
+        const { data } = await test.getAllDocuments('pages');
+        expect(data.length).to.equal(1);
+      });
   
       it('should create multiple records', async function () {
         
@@ -90,9 +98,16 @@ describe('jfauna', function () {
 
       it('should get a record by key:value', async function () {
         
-        const [record] = await $('posts').get(1).where('title').equals('My second post');
+        const [record] = await $('posts').get(1).where('title').is('My second post');
         
         expect(record.data.title).to.equal('My second post');
+      });
+
+      it.skip('should exclude a record by key:value', async function () {
+        
+        const records = await $('posts').get().where('title').isnt('My second post');
+        
+        expect(records.length).to.equal(2);
       });
     });
 
@@ -110,7 +125,7 @@ describe('jfauna', function () {
 
       it('should delete a record by key:value', async function () {
         
-        await $('posts').remove(1).where('title').equals('My second post');
+        await $('posts').remove(1).where('title').is('My second post');
         
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(1);

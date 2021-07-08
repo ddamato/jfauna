@@ -9,38 +9,39 @@ async function create(collection, data) {
 }
 
 async function remove(params) {
-  const { index, value, ...pagination } = params;
-  let query;
-
-  if (!value) {
-    query = q.Map(
-      q.Paginate(q.Match(q.Index(index)), pagination),
-      q.Lambda(x => q.Delete(x))
-    )
-  } else {
-    query = q.Map(
-      q.Paginate(q.Match(q.Index(index), [].concat(value)), pagination),
-      q.Lambda(x => q.Delete(x))
-    );
-  }
+  const { index, value, not, ...pagination } = params;
+  
+  const operation = getOperations(params);
+  
+  const query = q.Map(
+    q.Paginate(operation, pagination),
+    q.Lambda(x => q.Delete(x))
+  )
   await this._client.query(query);
 }
 
-async function get(params) {
-  const { index, value, ...pagination } = params;
-  let query;
+function getOperations({ index, value, not }) {
+  const Match = value
+    ? q.Match(q.Index(index), [].concat(value))
+    : q.Match(q.Index(index));
 
-  if (!value) {
-    query = q.Map(
-      q.Paginate(q.Match(q.Index(index)), pagination),
-      q.Lambda(x => q.Get(x))
-    )
-  } else {
-    query = q.Map(
-      q.Paginate(q.Match(q.Index(index), [].concat(value)), pagination),
-      q.Lambda(x => q.Get(x))
-    );
-  }
+  const Difference = q.Difference(
+    q.Match(q.Index(index)),
+    q.Match(q.Index(index), [].concat(value))
+  );
+
+  return not ? Difference : Match;
+}
+
+async function get(params) {
+  const { index, value, not, ...pagination } = params;
+
+  const operation = getOperations(params);
+
+  const query = q.Map(
+    q.Paginate(operation, pagination),
+    q.Lambda(x => q.Get(x))
+  )
   const response = await this._client.query(query);
   const results = [].concat(response.data).filter(Boolean);
 

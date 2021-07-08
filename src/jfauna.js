@@ -7,8 +7,8 @@ const m = require('./methods');
 // const $ = jfauna(client); return one instance, $ should be a function
 // collection doesn't exist -> create! (no failures!)
 
-// $(collection).get().where().equals();
-// $(collection).get().between().and();
+// $(collection).get(amount).where(field).is(value);
+// $(collection).get().where().isnt();
 // $(collection).delete();
 // $(collection).update();
 // $(collection).insert();
