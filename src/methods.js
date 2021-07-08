@@ -1,4 +1,6 @@
-const { collection, document, index } = require('./queries/queries');
+const collection = require('./queries/collection');
+const document = require('./queries/document');
+const index = require('./queries/index');
 
 const FAUNA_PAGINATION_SIZE = 64;
 
@@ -64,7 +66,7 @@ function chain(operation, params) {
           const ref = await index.name.call(this, 'equals', field);
           return await operation.call(this, { ...params, index: ref, field, value })
         },
-        
+
         isnt: async (value) => {
           await methods.resolve.call(this);
           const [ref, compare] = await Promise.all([
