@@ -2,7 +2,7 @@ const { query: q } = require('faunadb');
 
 async function create(name, field) {
   const source = q.Collection(this._currentCollectionName);
-  const query = q.CreateIndex({ name, source, terms: terms(field) });
+  const query = q.CreateIndex({ name, source, terms: terms(field), transform: 'casefold' });
   await this._client.query(query);
 }
 
