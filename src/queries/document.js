@@ -8,6 +8,16 @@ async function create(collection, data) {
   await this._client.query(query);
 }
 
+async function update(params) {
+  const query = q.Update(
+    q.Select('ref', q.Get(
+      getOperations(params)
+    )),
+    { data: params.data }
+  )
+  await this._client.query(query);
+}
+
 function remove(params) {
   return commonQuery.call(this, params, x => q.Delete(x))
 }
@@ -25,12 +35,8 @@ function getOperations({ index, value, compare }) {
   return compare ? Difference : Match;
 }
 
-function getPagination(params) {
-  return {
-    size: params.size,
-    before: params.before,
-    after: params.after
-  }
+function getPagination({ size, before, after }) {
+  return { size, before, after };
 }
 
 async function commonQuery(params, lambda) {
@@ -68,4 +74,5 @@ module.exports = {
   create,
   get,
   remove,
+  update,
 };

@@ -24,38 +24,42 @@ const methods = {
 
   remove: function (size = FAUNA_PAGINATION_SIZE) {
     return chain.call(this, document.remove, { size });
+  },
+
+  update: function(data) {
+    return chain.call(this, document.update, { data });
   }
 };
 
-function chain(operation, { size }) {
+function chain(operation, params) {
   return {
-    now: async () => now.call(this, operation, { size }),
+    now: async () => now.call(this, operation, { ...params }),
     where: (field) => {
       return {
-        is: async (value) => equals.call(this, operation, { size, field, value }),
-        isnt: async (value) => equals.call(this, operation, { size, field, value, compare: index.name('all', this._currentCollectionName) })
+        is: async (value) => equals.call(this, operation, { ...params, field, value }),
+        isnt: async (value) => equals.call(this, operation, { ...params, field, value, compare: index.name('all', this._currentCollectionName) })
       }
     }
   }
 }
 
-async function now(operation, { size }) {
+async function now(operation, params) {
   await methods.resolve.call(this);
   const name = index.name('all', this._currentCollectionName);
   await index.ensure.call(this, this._currentCollectionName, name);
-  return await operation.call(this, { index: name, size });
+  return await operation.call(this, { ...params, index: name });
 }
 
-async function equals(operation, { field, value, size, compare }) {
+async function equals(operation, params) {
   await methods.resolve.call(this);
-  const name = index.name('equals', this._currentCollectionName, field);
-  await index.ensure.call(this, this._currentCollectionName, name, field);
+  const name = index.name('equals', this._currentCollectionName, params.field);
+  await index.ensure.call(this, this._currentCollectionName, name, params.field);
 
-  if (compare) {
-    await index.ensure.call(this, this._currentCollectionName, compare);
+  if (params.compare) {
+    await index.ensure.call(this, this._currentCollectionName, params.compare);
   }
 
-  return await operation.call(this, { index: name, value, size, compare });
+  return await operation.call(this, { ...params, index: name });
 }
 
 module.exports = methods;
