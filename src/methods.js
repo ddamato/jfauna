@@ -4,7 +4,7 @@ const FAUNA_PAGINATION_SIZE = 64;
 
 const methods = {
   init: async function (m) {
-    await collection.ensure.call(this, this._currentCollectionName);
+    await collection.ensure.call(this);
     return m;
   },
 
@@ -33,29 +33,29 @@ const methods = {
 
 function chain(operation, params) {
   return {
-    now: async () => now.call(this, operation, { ...params }),
+    now: async () => {
+      await methods.resolve.call(this);
+      const ref = await index.name.call(this, 'all');
+      return await operation.call(this, { ...params, index: ref })
+    },
     where: (field) => {
       return {
-        is: async (value) => equals.call(this, operation, { ...params, field, value }),
+        is: async (value) => {
+          await methods.resolve.call(this);
+          const ref = await index.name.call(this, 'equals', field);
+          return await operation.call(this, { ...params, index: ref, field, value })
+        },
         isnt: async (value) => {
-          const compare = await index.name.call(this, 'all')
-          return equals.call(this, operation, { ...params, field, value, compare })
+          await methods.resolve.call(this);
+          const [ref, compare] = await Promise.all([
+            await index.name.call(this, 'equals', field),
+            await index.name.call(this, 'all')
+          ]);
+          return await operation.call(this, { ...params, index: ref, field, value, compare })
         }
       }
     }
   }
-}
-
-async function now(operation, params) {
-  await methods.resolve.call(this);
-  const name = await index.name.call(this, 'all');
-  return await operation.call(this, { ...params, index: name });
-}
-
-async function equals(operation, params) {
-  await methods.resolve.call(this);
-  const name = await index.name.call(this, 'equals', params.field);
-  return await operation.call(this, { ...params, index: name });
 }
 
 module.exports = methods;

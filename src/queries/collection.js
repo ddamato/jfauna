@@ -1,27 +1,21 @@
 const { q } = require('./faunadb');
 
-async function exists(name) {
-  return await this._client.query(q.Exists(q.Collection(name)));
+async function exists() {
+  return Boolean(await this._client.query(q.Exists(q.Collection(this._currentCollectionName))));
 }
 
-async function create(name) {
-  await this._client.query(q.CreateCollection({ name }));
+async function create() {
+  await this._client.query(q.CreateCollection({ name: this._currentCollectionName }));
 }
 
-function ensure(collectionName) {
+function ensure() {
   if (this.cache) {
-    if (this._collectionCache.has(collectionName)) {
-      return Promise.resolve();
+    if (this._collectionCache.has(this._currentCollectionName)) {
+      return Promise.resolve(true);
     }
-    this._collectionCache.add(collectionName);
+    this._collectionCache.add(this._currentCollectionName);
   }
-  return exists.call(this, collectionName).then((exists) => {
-    return !exists && create.call(this, collectionName);
-  });
+  return exists.call(this).then((exists) => !exists && create.call(this));
 }
 
-module.exports = { 
-  exists,
-  create,
-  ensure,
-};
+module.exports = { ensure };

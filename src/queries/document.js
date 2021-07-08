@@ -8,18 +8,29 @@ async function create(data) {
   await this._client.query(query);
 }
 
+function get(params) {
+  return commonQuery.call(this, params, (x) => q.Get(x));
+}
+
 async function update(params) {
   const query = q.Update(
-    q.Select('ref', q.Get(
-      getOperations(params)
-    )),
+    q.Select('ref', q.Get(getOperations(params))),
     { data: params.data }
-  )
+  );
   await this._client.query(query);
 }
 
 function remove(params) {
-  return commonQuery.call(this, params, x => q.Delete(x))
+  return commonQuery.call(this, params, (x) => q.Delete(x));
+}
+
+async function commonQuery(params, lambda) {
+  const query = q.Map(
+    q.Paginate(getOperations(params), getPagination(params)),
+    q.Lambda(lambda)
+  )
+  const response = await this._client.query(query);
+  return handlePaginatedResponse(response, params, lambda);
 }
 
 function getOperations({ index, value, compare }) {
@@ -37,19 +48,6 @@ function getOperations({ index, value, compare }) {
 
 function getPagination({ size, before, after }) {
   return { size, before, after };
-}
-
-async function commonQuery(params, lambda) {
-  const query = q.Map(
-    q.Paginate(getOperations(params), getPagination(params)),
-    q.Lambda(lambda)
-  )
-  const response = await this._client.query(query);
-  return handlePaginatedResponse(response, params, lambda);
-}
-
-function get(params) {
-  return commonQuery.call(this, params, x => q.Get(x))
 }
 
 function handlePaginatedResponse(response, params, lambda) {
@@ -73,6 +71,6 @@ function handlePaginatedResponse(response, params, lambda) {
 module.exports = { 
   create,
   get,
-  remove,
   update,
+  remove,
 };
