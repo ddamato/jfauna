@@ -1,8 +1,8 @@
 {
   "name": "jfauna",
   "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
+  "description": "jQuery-like chainable methods to make FaunaDB more accessible",
+  "main": "src/jfauna.js",
   "scripts": {
     "db:start": "docker run --name faunadb -p 8443:8443 -p 8084:8084 fauna/faunadb",
     "db:end": "docker container stop faunadb && docker container rm faunadb",
