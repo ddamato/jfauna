@@ -9,8 +9,8 @@ const methods = {
   },
 
   resolve: async function () {
-    await Promise.all(this._promises);
-    this._promises.length = 0;
+    await Promise.all(Array.from(this._promises));
+    this._promises.clear();
   },
 
   insert: async function (data) {

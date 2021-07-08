@@ -3,7 +3,7 @@ const m = require('./methods');
 function jFauna(client) {
 
   this._client = client;
-  this._promises = [];
+  this._promises = new Set();
   this._collectionCache = new Set();
   this._indexCache = new Set();
   this.cache = true;
@@ -21,7 +21,7 @@ function jFauna(client) {
 
     this._currentCollectionName = collectionName;
     const initCollection = m.init.call(this, methods);
-    this._promises.push(initCollection);
+    this._promises.add(initCollection);
     return Object.assign(initCollection, methods);
   };
   return Object.setPrototypeOf(instance, jFauna.prototype);
