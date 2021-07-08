@@ -66,6 +66,8 @@ describe('jfauna', function () {
 
         const { data } = await test.getAllDocuments('pages');
         expect(data.length).to.equal(1);
+        const titles = data.map(({ data }) => data.title);
+        expect(titles).to.include('My first page');
       });
   
       it('should create multiple records', async function () {
@@ -108,6 +110,41 @@ describe('jfauna', function () {
         const records = await $('posts').get().where('title').isnt('My second post');
         
         expect(records.length).to.equal(2);
+      });
+    });
+
+    describe('update', function () {
+      it('should update all records', async function () {
+
+        await $('pages').update({ title: 'My new page' }).now();
+
+        const { data } = await test.getAllDocuments('pages');
+        expect(data.length).to.equal(1);
+        const titles = data.map(({ data }) => data.title);
+        expect(titles).to.not.include('My first page');
+        expect(titles).to.include('My new page');
+      });
+
+      it('should update a record by key:value', async function () {
+
+        await $('pages').update({ title: 'Our first page' }).where('title').is('My new page');
+
+        const { data } = await test.getAllDocuments('pages');
+        expect(data.length).to.equal(1);
+        const titles = data.map(({ data }) => data.title);
+        expect(titles).to.not.include('My new page');
+        expect(titles).to.include('Our first page');
+      });
+
+      it('should update a record by exclued key:value', async function () {
+
+        await $('pages').update({ title: 'Our second page' }).where('title').isnt('My second page');
+
+        const { data } = await test.getAllDocuments('pages');
+        expect(data.length).to.equal(1);
+        const titles = data.map(({ data }) => data.title);
+        expect(titles).to.not.include('Our first page');
+        expect(titles).to.include('Our second page');
       });
     });
 

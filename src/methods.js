@@ -15,7 +15,7 @@ const methods = {
 
   insert: async function (data) {
     await methods.resolve.call(this);
-    await document.create.call(this, this._currentCollectionName, data);
+    await document.create.call(this, data);
   },
 
   get: function (size = FAUNA_PAGINATION_SIZE) {

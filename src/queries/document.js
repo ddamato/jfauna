@@ -1,9 +1,9 @@
 const { q } = require('./faunadb');
 
-async function create(collection, data) {
+async function create(data) {
   const query = q.Map(
     [].concat(data),
-    q.Lambda('data', q.Create(q.Collection(collection), { data: q.Var('data') }))
+    q.Lambda('data', q.Create(q.Collection(this._currentCollectionName), { data: q.Var('data') }))
   );
   await this._client.query(query);
 }

@@ -28,6 +28,7 @@ function jFauna(client) {
       insert: m.insert.bind(this),
       remove: m.remove.bind(this),
       get: m.get.bind(this),
+      update: m.update.bind(this),
     };
 
     this._currentCollectionName = collectionName;
