@@ -1,27 +1,21 @@
 const { query: q } = require('faunadb');
 
 async function create(data) {
-  const query = q.Map(
-    [].concat(data),
-    q.Lambda('data', q.Create(q.Collection(this._currentCollectionName), { data: q.Var('data') }))
-  );
+  const lambda = (data) => q.Create(q.Collection(this._currentCollectionName), { data });
+  const query = q.Map([].concat(data), q.Lambda(lambda));
   await this._client.query(query);
 }
 
 function get(params) {
-  return commonQuery.call(this, params, (x) => q.Get(x));
+  return commonQuery.call(this, params, (ref) => q.Get(ref));
 }
 
 async function update(params) {
-  const query = q.Update(
-    q.Select('ref', q.Get(getOperations(params))),
-    { data: params.data }
-  );
-  await this._client.query(query);
+  return commonQuery.call(this, params, (ref) => q.Update(ref, { data: params.data }));
 }
 
 function remove(params) {
-  return commonQuery.call(this, params, (x) => q.Delete(x));
+  return commonQuery.call(this, params, (ref) => q.Delete(ref));
 }
 
 async function commonQuery(params, lambda) {
