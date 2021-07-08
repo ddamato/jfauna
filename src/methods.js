@@ -37,7 +37,10 @@ function chain(operation, params) {
     where: (field) => {
       return {
         is: async (value) => equals.call(this, operation, { ...params, field, value }),
-        isnt: async (value) => equals.call(this, operation, { ...params, field, value, compare: index.name.call(this, 'all') })
+        isnt: async (value) => {
+          const compare = await index.name.call(this, 'all')
+          return equals.call(this, operation, { ...params, field, value, compare })
+        }
       }
     }
   }
@@ -45,20 +48,13 @@ function chain(operation, params) {
 
 async function now(operation, params) {
   await methods.resolve.call(this);
-  const name = index.name.call(this, 'all');
-  await index.ensure.call(this, name);
+  const name = await index.name.call(this, 'all');
   return await operation.call(this, { ...params, index: name });
 }
 
 async function equals(operation, params) {
   await methods.resolve.call(this);
-  const name = index.name.call(this, 'equals', params.field);
-  await index.ensure.call(this, name, params.field);
-
-  if (params.compare) {
-    await index.ensure.call(this, params.compare);
-  }
-
+  const name = await index.name.call(this, 'equals', params.field);
   return await operation.call(this, { ...params, index: name });
 }
 

@@ -30,8 +30,10 @@ async function create(name, field) {
   )
 }
 
-function name(...parts) {
-  return [this._currentCollectionName].concat(parts).join('-');
+async function name(type, field) {
+  const reference = [type, this._currentCollectionName, field].filter(Boolean).join('-');
+  await ensure.call(this, reference, field);
+  return reference;
 }
 
 module.exports = { 
