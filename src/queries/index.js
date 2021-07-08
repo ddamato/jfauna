@@ -1,7 +1,13 @@
 const { query: q } = require('faunadb');
 
-async function exists(name) {
-  return Boolean(await this._client.query(q.Exists(q.Index(name))));
+async function create(name, field) {
+  let terms;
+  if (field) {
+    terms = [{ field: ['data', field] }];
+  }
+  const source = q.Collection(this._currentCollectionName);
+  const query = q.CreateIndex({ name, source, terms });
+  await this._client.query(query);
 }
 
 function ensure(name, field) {
@@ -14,20 +20,14 @@ function ensure(name, field) {
   return exists.call(this, name).then((exists) => !exists && create.call(this, name, field));
 }
 
-async function create(name, field) {
-  let terms;
-  if (field) {
-    terms = [{ field: ['data', field] }];
-  }
-  const source = q.Collection(this._currentCollectionName);
-  const query = q.CreateIndex({ name, source, terms });
-  await this._client.query(query);
-}
-
 async function name(type, field) {
   const reference = [type, this._currentCollectionName, field].filter(Boolean).join('-');
   await ensure.call(this, reference, field);
   return reference;
+}
+
+async function exists(name) {
+  return Boolean(await this._client.query(q.Exists(q.Index(name))));
 }
 
 module.exports = { name };
