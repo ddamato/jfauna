@@ -142,7 +142,7 @@ describe('jfauna', function () {
 
         const { data } = await test.getAllDocuments('pages');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.not.include('Our first page');
         expect(titles).to.include('Our second page');
       });
@@ -155,7 +155,7 @@ describe('jfauna', function () {
         
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(2);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.not.include('My first post');
         expect(titles).to.include('My second post');
       });
@@ -166,7 +166,7 @@ describe('jfauna', function () {
         
         const { data } = await test.getAllDocuments('posts');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.not.include('My second post');
         expect(titles).to.include('My third post');
       });
