@@ -28,7 +28,7 @@ describe('jfauna', function () {
       // Create a new collection called "posts"
       await $('posts');
       
-      expect(await test.collectionExists('posts')).to.be.true;
+      expect(await test.isCollection('posts')).to.be.true;
     });
 
     it('should not create a duplicate collection', async function () {
@@ -66,7 +66,7 @@ describe('jfauna', function () {
 
         const { data } = await test.getAllDocuments('pages');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.include('My first page');
       });
   
@@ -120,7 +120,7 @@ describe('jfauna', function () {
 
         const { data } = await test.getAllDocuments('pages');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.not.include('My first page');
         expect(titles).to.include('My new page');
       });
@@ -131,7 +131,7 @@ describe('jfauna', function () {
 
         const { data } = await test.getAllDocuments('pages');
         expect(data.length).to.equal(1);
-        const titles = data.map(({ data }) => data.title);
+        const titles = test.getTitlesFromData(data);
         expect(titles).to.not.include('My new page');
         expect(titles).to.include('Our first page');
       });

@@ -8,52 +8,48 @@ const config = {
   secret: LOCAL_DEV_SECRET,
 };
 
-function createLocalClient() {
-  return new Client(config);
+function create(name) {
+  global.FAUNA_DB_CLIENT = new Client(config);
+  return global.FAUNA_DB_CLIENT.query(q.CreateDatabase({ name }));
 }
 
-async function create(name) {
-  const client = createLocalClient();
-  await client.query(q.CreateDatabase({ name }));
-  return client;
+function destroy(name) {
+  return global.FAUNA_DB_CLIENT.query(q.Delete(q.Database(name)))
+    .then(() => delete global.FAUNA_DB_CLIENT);
 }
 
-async function destroy(name) {
-  const client = createLocalClient();
-  await client.query(q.Delete(q.Database(name)));
+function isCollection(name) {
+  return global.FAUNA_DB_CLIENT.query(q.Exists(q.Collection(name)));
 }
 
-async function collectionExists(name) {
-  const client = createLocalClient();
-  return Boolean(await client.query(q.Exists(q.Collection(name))));
-}
-
-async function getAllCollections() {
-  const client = createLocalClient();
-  return await client.query(q.Map(
-    q.Paginate(q.Collections()),
-    q.Lambda(x => q.Get(x))
-  ));
-}
-
-async function deleteCollection(name) {
-  const client = createLocalClient();
-  await client.query(q.Delete(q.Collection(name)));
-}
-
-async function getAllDocuments(name) {
-  const client = createLocalClient();
-  return await client.query(q.Map(
+function getAllDocuments(name) {
+  return global.FAUNA_DB_CLIENT.query(q.Map(
     q.Paginate(q.Documents(q.Collection(name))),
     q.Lambda(x => q.Get(x))
   ));
 }
 
+function getAllCollections() {
+  return global.FAUNA_DB_CLIENT.query(q.Map(
+    q.Paginate(q.Collections()),
+    q.Lambda(x => q.Get(x))
+  ));
+}
+
+function getTitlesFromData(d) {
+  return d.map(({ data }) => data.title);
+}
+
+function deleteCollection(name) {
+  return global.FAUNA_DB_CLIENT.query(q.Delete(q.Collection(name)));
+}
+
 module.exports = {
   create,
   destroy,
-  collectionExists,
+  isCollection,
   getAllDocuments,
-  deleteCollection,
-  getAllCollections
+  getAllCollections,
+  getTitlesFromData,
+  deleteCollection
 };
