@@ -28,13 +28,16 @@ async function commonQuery(params, lambda) {
 }
 
 function getOperations({ index, value, compare }) {
+  // TODO: Casefold each value for case-insensitive comparison
+  const group = [].concat(value);
+
   const Match = value
-    ? q.Match(q.Index(index), [].concat(value))
+    ? q.Match(q.Index(index), group)
     : q.Match(q.Index(index));
 
   const Difference = q.Difference(
     q.Match(q.Index(compare)),
-    q.Match(q.Index(index), [].concat(value))
+    q.Match(q.Index(index), group)
   );
 
   return compare ? Difference : Match;

@@ -1,4 +1,4 @@
-const m = require('./methods');
+const { init, assign } = require('./methods');
 
 /**
  * Creates a new instance of jFauna
@@ -27,19 +27,13 @@ function jFauna(client) {
   const instance = (collectionName) => {
     
     // All of the primary methods from the collection
-    const methods = {
-      resolve: m.resolve.bind(this),
-      insert: m.insert.bind(this),
-      remove: m.remove.bind(this),
-      get: m.get.bind(this),
-      update: m.update.bind(this),
-    };
+    const methods = assign.call(this);
 
     // Storing the collection name to be referenced while preparing queries
     this._currentCollectionName = collectionName;
 
     // Ensure the collection exists before proceeding, return the methods when resolved.
-    const initCollection = m.init.call(this, methods);
+    const initCollection = init.call(this).then(() => methods);
 
     // Allows this to be awaited later in the chain
     this._promises.add(initCollection);

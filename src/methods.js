@@ -6,10 +6,21 @@ const FAUNA_PAGINATION_SIZE = 64;
 
 const methods = {
 
-  // Ensures the collection exists, returns the bound methods for the jFauna instance
-  init: async function (m) {
-    await collection.ensure.call(this);
-    return m;
+  // Ensures the collection exists
+  init: function () {
+    return collection.ensure.call(this);
+  },
+
+  // Bind all the chainable methods to the instance
+  assign: function () {
+    // TODO: Allow for renamable methods
+    return {
+      resolve: methods.resolve.bind(this),
+      insert: methods.insert.bind(this),
+      remove: methods.remove.bind(this),
+      get: methods.get.bind(this),
+      update: methods.update.bind(this),
+    }
   },
 
   // Resolves the group of promises before proceeding
